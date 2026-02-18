@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Build/test artifacts
+dist/
+func.log
+
+# Azure Functions local settings
+local.settings.json
+src/function_app/local.settings.json
+
+# OS/editor
+.DS_Store
+Thumbs.db

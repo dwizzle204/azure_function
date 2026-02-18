@@ -1,0 +1,13 @@
+# Default fallback owners
+* @your-org/application-engineering
+
+# Application ownership
+src/** @your-org/application-engineering
+tests/** @your-org/application-engineering
+
+# Infrastructure ownership
+infra/** @your-org/cloud-engineering
+
+# Protected governance and automation paths
+.github/workflows/** @your-org/cloud-engineering @your-org/application-engineering
+CODEOWNERS @your-org/cloud-engineering @your-org/application-engineering

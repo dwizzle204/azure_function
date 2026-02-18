@@ -1,0 +1,77 @@
+name: app-deploy-stage
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_version:
+        description: "Version suffix from app-release artifact (example: 1.2.3-a1b2c3d)"
+        required: true
+        type: string
+      source_run_id:
+        description: "GitHub Actions run_id that produced the artifact"
+        required: true
+        type: string
+      function_app_name:
+        description: "Azure Function App name"
+        required: true
+        type: string
+      slot_name:
+        description: "Deployment slot name"
+        required: true
+        default: "stage"
+        type: string
+
+env:
+  ARTIFACT_PREFIX: function-app
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+concurrency:
+  group: app-stage-deploy-${{ inputs.function_app_name }}-${{ inputs.slot_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-stage:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download selected artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ inputs.artifact_version }}
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Resolve package path
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          PACKAGE_PATH="$(find ./artifact -type f -name '*.zip' | head -n 1)"
+          if [ -z "$PACKAGE_PATH" ]; then
+            echo "No zip artifact found for selected version" >&2
+            exit 1
+          fi
+          echo "zip_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Azure login (limited deploy identity)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DEPLOY }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy artifact to stage slot
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.function_app_name }}
+          slot-name: ${{ inputs.slot_name }}
+          package: ${{ steps.package.outputs.zip_path }}
+
+      - name: Logout Azure session
+        if: always()
+        run: az logout

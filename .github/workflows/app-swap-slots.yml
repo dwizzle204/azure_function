@@ -1,0 +1,57 @@
+name: app-swap-slots
+
+on:
+  workflow_dispatch:
+    inputs:
+      function_app_name:
+        description: "Azure Function App name"
+        required: true
+        type: string
+      resource_group_name:
+        description: "Azure resource group containing the Function App"
+        required: true
+        type: string
+      source_slot:
+        description: "Source slot to promote"
+        required: true
+        default: "stage"
+        type: string
+      target_slot:
+        description: "Target slot"
+        required: true
+        default: "production"
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: app-slot-swap-${{ inputs.function_app_name }}
+  cancel-in-progress: false
+
+jobs:
+  swap-stage-to-production:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Azure login (promotion identity)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROMOTION }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Swap slots
+        shell: bash
+        run: |
+          set -euo pipefail
+          az functionapp deployment slot swap \
+            --name "${{ inputs.function_app_name }}" \
+            --resource-group "${{ inputs.resource_group_name }}" \
+            --slot "${{ inputs.source_slot }}" \
+            --target-slot "${{ inputs.target_slot }}"
+
+      - name: Logout Azure session
+        if: always()
+        run: az logout
