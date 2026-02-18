@@ -129,6 +129,9 @@ Configure branch protection on `main` to require:
 
 Reference baseline: `.github/branch-protection.md`
 
+### Versioning guard
+- `version-bump-check.yml` enforces that `VERSION` must be updated in any PR that changes `src/**` or `infra/**`.
+
 ### Terraform Cloud setup
 - Create organization and workspaces matching naming convention:
   - `<repo-name>-dev`

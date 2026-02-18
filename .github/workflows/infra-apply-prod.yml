@@ -3,8 +3,8 @@ name: infra-apply-prod
 on:
   workflow_dispatch:
     inputs:
-      apply_reason:
-        description: "Reason for production apply"
+      change_request_number:
+        description: "Approved change request number (example: CR-12345)"
         required: true
         type: string
 
@@ -54,7 +54,7 @@ jobs:
         uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.3.2
         with:
           run: ${{ fromJSON(steps.apply-create-run.outputs.payload).data.id }}
-          comment: ${{ format('Manual prod apply: {0}', inputs.apply_reason) }}
+          comment: ${{ format('Manual prod apply (change request): {0}', inputs.change_request_number) }}
 
       - name: Add apply summary to workflow
         shell: bash
@@ -65,5 +65,5 @@ jobs:
             echo "Workspace: \\`${{ env.TF_WORKSPACE }}\\`"
             echo "Run URL: ${{ steps.apply-create-run.outputs.run_link }}"
             echo ""
-            echo "Reason: ${{ inputs.apply_reason }}"
+            echo "Change Request: ${{ inputs.change_request_number }}"
           } >> "$GITHUB_STEP_SUMMARY"

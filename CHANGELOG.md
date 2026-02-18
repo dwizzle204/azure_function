@@ -11,6 +11,7 @@
 - `Makefile` for local developer parity commands (`install-dev`, `lint`, `test`, `package`).
 - Production promotion and rollback runbook at `docs/production-promotion-runbook.md`.
 - `app-deploy-dev.yml` manual workflow for non-release deployment directly to dedicated dev Function App.
+- `version-bump-check.yml` PR guard requiring `VERSION` updates when `src/**` or `infra/**` changes.
 
 ### Changed
 - App CI now includes local Azure Functions Core Tools smoke test in addition to linting and package validation.

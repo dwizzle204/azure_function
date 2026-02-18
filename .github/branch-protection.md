@@ -15,6 +15,7 @@ Apply the following settings in GitHub repository settings for branch `main`.
 - `infra-validate / terraform-validate`
 - `infra-plan-dev / terraform-plan-dev`
 - `infra-plan-prod / terraform-plan-prod`
+- `version-bump-check / enforce-version-bump`
 
 Manual deployment workflows are intentionally excluded from required status checks:
 - `app-deploy-dev.yml`

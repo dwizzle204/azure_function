@@ -31,7 +31,7 @@
   - Dev plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/dev.tfvars`, workflow file.
   - Prod plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/prod.tfvars`, workflow file.
   - Dev apply: push to `main` on `infra/*.tf`, `infra/modules/**`, `infra/env/dev.tfvars`, workflow file.
-  - Prod apply: `workflow_dispatch` only.
+  - Prod apply: `workflow_dispatch` only, must include approved change request number input.
 - Apply/deploy workflows must define `concurrency` with `cancel-in-progress: false`.
 
 ## Identity and Secrets
@@ -74,4 +74,6 @@
   - `infra-validate / terraform-validate`
   - `infra-plan-dev / terraform-plan-dev`
   - `infra-plan-prod / terraform-plan-prod`
+  - `version-bump-check / enforce-version-bump`
 - Required-check workflows should run on all pull requests (no path filters) to avoid merge deadlocks.
+- Keep `version-bump-check.yml` aligned with policy: changes under `src/**` or `infra/**` require a `VERSION` update.

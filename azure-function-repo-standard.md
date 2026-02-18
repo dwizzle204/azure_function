@@ -177,6 +177,7 @@ workflow_dispatch
 
 Production apply must never auto-run.
 Production apply must require GitHub `production` environment approval.
+Production apply dispatch input must require an approved change request number.
 
 ## Application workflows
 
