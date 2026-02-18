@@ -2,11 +2,6 @@ name: infra-plan-prod
 
 on:
   pull_request:
-    paths:
-      - "infra/*.tf"
-      - "infra/modules/**"
-      - "infra/env/prod.tfvars"
-      - ".github/workflows/infra-plan-prod.yml"
 
 env:
   TF_CLOUD_ORGANIZATION: replace-with-tfc-organization

@@ -32,6 +32,18 @@ variable "functions_extension_version" {
   default     = "~4"
 }
 
+variable "enable_stage_slot" {
+  description = "Whether to create a stage slot for swap-based promotion."
+  type        = bool
+  default     = false
+}
+
+variable "stage_slot_name" {
+  description = "Name of the stage slot used for production promotion."
+  type        = string
+  default     = "stage"
+}
+
 variable "tags" {
   description = "Additional tags applied to all resources."
   type        = map(string)

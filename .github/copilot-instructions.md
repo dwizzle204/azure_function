@@ -14,8 +14,10 @@
 - Deploy artifacts to the `stage` slot first, then promote via slot swap.
 - Keep production operations manual and approval-gated.
 - `app-ci.yml`: PR trigger for `src/**`, `tests/**`, and workflow file changes.
+- `app-deploy-dev.yml`: `workflow_dispatch` only, deploys non-release package directly to dedicated dev Function App (no slot).
 - `app-release.yml`: push to `main` trigger for `src/**`, `VERSION`, and workflow file changes.
 - `app-deploy-stage.yml` and `app-swap-slots.yml`: `workflow_dispatch` only.
+- Dev environment must be single-slot (no stage slot); production uses stage slot + swap promotion.
 
 ## Terraform Rules
 - Use Terraform Cloud remote execution through official HashiCorp GitHub Actions.
@@ -41,6 +43,7 @@
 - Required secret names:
   - `AZURE_TENANT_ID`
   - `AZURE_SUBSCRIPTION_ID`
+  - `AZURE_CLIENT_ID_DEV_DEPLOY`
   - `AZURE_CLIENT_ID_DEPLOY`
   - `AZURE_CLIENT_ID_PROMOTION`
   - `TF_API_TOKEN_DEV_PLAN`
@@ -48,6 +51,7 @@
   - `TF_API_TOKEN_PROD_PLAN`
   - `TF_API_TOKEN_PROD_APPLY`
 - `AZURE_CLIENT_ID_PROMOTION` and `TF_API_TOKEN_PROD_APPLY` are production-environment-only.
+- `AZURE_CLIENT_ID_DEV_DEPLOY` should be kept in GitHub `dev` environment.
 
 ## Workflow Security
 - PR workflows may lint/test/build/plan, but must not deploy, apply, or swap slots.
@@ -70,3 +74,4 @@
   - `infra-validate / terraform-validate`
   - `infra-plan-dev / terraform-plan-dev`
   - `infra-plan-prod / terraform-plan-prod`
+- Required-check workflows should run on all pull requests (no path filters) to avoid merge deadlocks.

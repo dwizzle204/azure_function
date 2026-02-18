@@ -19,8 +19,8 @@ output "function_app_default_hostname" {
 }
 
 output "stage_slot_id" {
-  description = "Stage deployment slot ID."
-  value       = azurerm_linux_function_app_slot.stage.id
+  description = "Stage deployment slot ID when stage slot is enabled."
+  value       = try(azurerm_linux_function_app_slot.stage[0].id, null)
 }
 
 output "storage_account_name" {

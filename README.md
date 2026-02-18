@@ -23,14 +23,20 @@ Identity is separated by environment and privilege.
 Production credentials/tokens must be stored only in the GitHub `production` environment.
 
 ## Deployment Workflow
-Application delivery uses zip artifacts and slot-based promotion.
+Application delivery uses two paths: non-release dev deployment and release promotion.
 
 1. `app-ci.yml` (PR): lint, dependency install, local runtime smoke test using Azure Functions Core Tools, and packaging validation.
-2. `app-release.yml` (push to `main`): build zip from `src/function_app` and publish versioned artifact.
-3. `app-deploy-stage.yml` (manual): deploy selected artifact version to `stage` slot using deploy identity.
-4. `app-swap-slots.yml` (manual): swap `stage` into `production` using promotion identity.
+2. `app-deploy-dev.yml` (manual): build temporary package from selected git ref and deploy directly to dedicated dev Function App (no stage slot).
+3. `app-release.yml` (push to `main`): build zip from `src/function_app` and publish versioned artifact.
+4. `app-deploy-stage.yml` (manual): deploy selected release artifact version to `stage` slot using stage deploy identity.
+5. `app-swap-slots.yml` (manual): swap `stage` into `production` using promotion identity.
 
 Production traffic is never deployed directly.
+
+## Slot Strategy
+- Dev environment uses a single dedicated Function App without deployment slots (`enable_stage_slot = false`).
+- Production environment uses swap-based promotion with a stage slot (`enable_stage_slot = true`, `stage_slot_name = "stage"`).
+- `app-deploy-stage.yml` and `app-swap-slots.yml` are for production promotion path only.
 
 ## Local Developer Commands
 Use the repository `Makefile` to align local checks with CI:
@@ -63,6 +69,7 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
 ## Workflow Reference
 Application workflows:
 - `app-ci.yml`: pull request quality gate for app code only (no deploy).
+- `app-deploy-dev.yml`: manual direct deploy to dedicated dev Function App using non-release package.
 - `app-release.yml`: builds and publishes versioned app artifact on `main`.
 - `app-deploy-stage.yml`: manual deploy of selected artifact version to stage slot.
 - `app-swap-slots.yml`: manual stage-to-production slot swap.
@@ -103,6 +110,7 @@ Configure `production` with:
 Repository-level (or `dev` environment where preferred):
 - `AZURE_TENANT_ID`
 - `AZURE_SUBSCRIPTION_ID`
+- `AZURE_CLIENT_ID_DEV_DEPLOY` (dev app deploy only)
 - `AZURE_CLIENT_ID_DEPLOY` (non-prod scope where possible)
 - `TF_API_TOKEN_DEV_PLAN`
 - `TF_API_TOKEN_DEV_APPLY`

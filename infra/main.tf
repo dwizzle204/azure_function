@@ -70,7 +70,8 @@ resource "azurerm_linux_function_app" "this" {
 }
 
 resource "azurerm_linux_function_app_slot" "stage" {
-  name            = "stage"
+  count           = var.enable_stage_slot ? 1 : 0
+  name            = var.stage_slot_name
   function_app_id = azurerm_linux_function_app.this.id
 
   site_config {

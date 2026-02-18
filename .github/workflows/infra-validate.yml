@@ -2,11 +2,6 @@ name: infra-validate
 
 on:
   pull_request:
-    paths:
-      - "infra/*.tf"
-      - "infra/modules/**"
-      - "infra/env/**"
-      - ".github/workflows/infra-validate.yml"
 
 permissions:
   contents: read

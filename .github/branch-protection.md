@@ -16,6 +16,12 @@ Apply the following settings in GitHub repository settings for branch `main`.
 - `infra-plan-dev / terraform-plan-dev`
 - `infra-plan-prod / terraform-plan-prod`
 
+Manual deployment workflows are intentionally excluded from required status checks:
+- `app-deploy-dev.yml`
+- `app-deploy-stage.yml`
+- `app-swap-slots.yml`
+- `infra-apply-prod.yml`
+
 ## Environment Protection
 - `production` environment must require reviewers.
 - `production` environment holds prod-only secrets and credentials.

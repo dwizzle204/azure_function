@@ -34,6 +34,7 @@ CODEOWNERS
   workflows/
     app-ci.yml
     app-release.yml
+    app-deploy-dev.yml
     app-deploy-stage.yml
     app-swap-slots.yml
     infra-validate.yml
@@ -70,7 +71,22 @@ infra/
 
 Application code is packaged as a zip artifact.
 
-Pipeline flow:
+Pipeline has two distinct paths:
+
+## Dev validation path (non-release)
+
+1. Build temporary package from selected git ref
+2. Deploy to dedicated dev Function App (not a slot)
+3. Validate in dev environment
+
+Rules:
+
+- must not deploy to stage slot
+- must not deploy to production
+- must use dedicated dev deploy identity
+- dev environment infrastructure should use a single Function App instance without slots
+
+## Release and promotion path
 
 1. Build Python function
 2. Package zip artifact
@@ -80,6 +96,15 @@ Pipeline flow:
 
 Production traffic must never be deployed directly.
 Slot swap is the production promotion step.
+
+## Slot Configuration Rules
+
+- Slot creation must be variable-driven in Terraform.
+- Dev environment must set:
+  - `enable_stage_slot = false`
+- Production environment must set:
+  - `enable_stage_slot = true`
+  - `stage_slot_name = "stage"` (or approved equivalent)
 
 ---
 
@@ -128,10 +153,7 @@ before upload-configuration is executed.
 
 Plan runs on:
 
-- terraform file changes
-- module changes
-- dev tfvars change
-- workflow file changes for the dev plan workflow
+- all pull requests (required branch protection check)
 
 Apply runs automatically on merge to main.
 Apply trigger scope:
@@ -145,10 +167,7 @@ Apply trigger scope:
 
 Plan runs on:
 
-- terraform file changes
-- module changes
-- prod tfvars change
-- workflow file changes for the prod plan workflow
+- all pull requests (required branch protection check)
 
 Apply runs only via:
 
@@ -163,15 +182,15 @@ Production apply must require GitHub `production` environment approval.
 
 `app-ci.yml` runs on pull request changes to:
 
-- `src/**`
-- `tests/**`
-- `.github/workflows/app-ci.yml`
+- all pull requests (required branch protection check)
 
 `app-release.yml` runs on push to `main` changes to:
 
 - `src/**`
 - `VERSION`
 - `.github/workflows/app-release.yml`
+
+`app-deploy-dev.yml` runs only via `workflow_dispatch` and deploys to dedicated dev Function App.
 
 `app-deploy-stage.yml` and `app-swap-slots.yml` run only via `workflow_dispatch`.
 
@@ -186,6 +205,13 @@ Separate identities by:
 - privilege level
 
 ## Application identities
+
+### Dev deploy identity
+Used for:
+- deploy non-release package to dedicated dev Function App
+
+Permissions:
+- write dedicated dev Function App only
 
 ### Deploy identity
 Used for:
@@ -224,6 +250,7 @@ Permissions:
 Application deployment:
 - `AZURE_TENANT_ID`
 - `AZURE_SUBSCRIPTION_ID`
+- `AZURE_CLIENT_ID_DEV_DEPLOY`
 - `AZURE_CLIENT_ID_DEPLOY`
 - `AZURE_CLIENT_ID_PROMOTION`
 
@@ -235,6 +262,7 @@ Terraform Cloud:
 
 Required placement:
 - `AZURE_CLIENT_ID_PROMOTION` and `TF_API_TOKEN_PROD_APPLY` must exist only in GitHub `production` environment.
+- `AZURE_CLIENT_ID_DEV_DEPLOY` should be stored in GitHub `dev` environment.
 - `AZURE_CLIENT_ID_DEPLOY` must be scoped to stage deployment permissions only.
 
 ---
@@ -286,6 +314,7 @@ for deployment workflows.
 
 The following workflows must define `concurrency` with `cancel-in-progress: false`:
 
+- `app-deploy-dev.yml`
 - `app-deploy-stage.yml`
 - `app-swap-slots.yml`
 - `infra-apply-dev.yml`
