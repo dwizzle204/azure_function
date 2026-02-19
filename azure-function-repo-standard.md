@@ -118,6 +118,10 @@ Terraform:
 - must use Terraform Cloud remote execution
 - must not run CLI plan/apply locally
 - must use official HashiCorp GitHub Actions calling Terraform Cloud API
+- should standardize Function App infrastructure on:
+  - `Azure/terraform-azurerm-avm-ptn-function-app-storage-private-endpoints`
+- should use AVM Key Vault module when Key Vault is required:
+  - `Azure/terraform-azurerm-avm-res-keyvault-vault`
 
 ## Workspace Model
 
@@ -426,7 +430,10 @@ This repository model ensures:
 - production deploys require explicit approval
 - least privilege identities limit blast radius
 - repository structure is predictable across all Azure Functions
-- baseline security hardening is applied to Function App, Storage, and Key Vault resources
+- baseline security hardening is applied to Function App and Storage resources
+- optional Key Vault defaults to private access model:
+  - public network access disabled
+  - private endpoint enabled by default when Key Vault is enabled
 
 ## Optional Network Controls
 
@@ -435,6 +442,6 @@ Terraform should support optional, env-specific network controls:
 - Function App VNet integration toggled by variable
 - Private endpoints toggled separately for:
   - Storage Account (blob)
-  - Key Vault
   - Function App
+  - Key Vault
 - Private endpoint DNS zone IDs provided via variables when DNS integration is required

@@ -30,11 +30,11 @@
 - Upload Terraform Cloud configuration from `infra` as the root module directory.
 - Preserve hardening defaults:
   - Function App/system slot: managed identity, HTTPS only, TLS 1.2 minimum, FTPS disabled, HTTP/2 enabled
-  - Storage: public blob access disabled, versioning + retention enabled
-  - Key Vault: RBAC auth enabled, purge protection enabled, soft delete retention configured
+  - Storage: secure baseline managed by AVM module defaults
+  - Optional Key Vault: use AVM Key Vault module with public network disabled and private endpoint default-enabled
 - Keep optional network controls variable-driven and environment-specific:
   - Function App VNet integration toggle + subnet ID
-  - Per-resource private endpoint toggles for storage, key vault, and function app
+  - Per-resource private endpoint toggles for storage, function app, and optional key vault
   - Optional private DNS zone IDs for each private endpoint type
 - Infra triggers:
   - Dev plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/dev.tfvars`, workflow file.

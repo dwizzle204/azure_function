@@ -65,6 +65,8 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
 - Remote runs upload from `infra` as the Terraform root module.
 
 ## Infrastructure Hardening Baseline
+Infrastructure is provisioned via `Azure/avm-ptn-function-app-storage-private-endpoints/azurerm`.
+
 - Function App and stage slot use:
   - system-assigned managed identity
   - HTTPS only
@@ -72,14 +74,10 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
   - FTPS disabled
   - HTTP/2 enabled
 - Storage account uses:
-  - minimum TLS 1.2
-  - public blob access disabled
-  - blob versioning enabled
-  - blob/container soft delete retention
-- Key Vault is provisioned by default (`enable_key_vault = true`) with:
-  - RBAC authorization enabled
-  - purge protection enabled
-  - soft delete retention configured
+  - secure storage defaults from the AVM module
+- Optional Key Vault is provisioned via `Azure/avm-res-keyvault-vault/azurerm` with secure defaults:
+  - `public_network_access_enabled = false`
+  - private endpoint enabled by default when Key Vault is enabled (`enable_key_vault_private_endpoint = true`)
 
 ## Network Isolation Options
 Optional network controls are available per environment via tfvars:
@@ -90,8 +88,8 @@ Optional network controls are available per environment via tfvars:
 - Private endpoints:
   - shared subnet input: `private_endpoint_subnet_id`
   - storage blob: `enable_storage_private_endpoint`, `storage_private_dns_zone_id`
-  - key vault: `enable_key_vault_private_endpoint`, `key_vault_private_dns_zone_id`
   - function app: `enable_function_app_private_endpoint`, `function_app_private_dns_zone_id`
+  - key vault: `enable_key_vault`, `enable_key_vault_private_endpoint`, `key_vault_private_dns_zone_id`
 
 All are disabled by default and can be enabled per environment.
 Subnet IDs are expected to reference existing bootstrap network resources.

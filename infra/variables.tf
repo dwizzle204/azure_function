@@ -26,6 +26,12 @@ variable "functions_extension_version" {
   default     = "~4"
 }
 
+variable "application_insights_connection_string" {
+  description = "Optional Application Insights connection string to inject into Function App settings."
+  type        = string
+  default     = null
+}
+
 variable "enable_stage_slot" {
   description = "Whether to create a stage slot for swap-based promotion."
   type        = bool
@@ -36,24 +42,6 @@ variable "stage_slot_name" {
   description = "Name of the stage slot used for production promotion."
   type        = string
   default     = "stage"
-}
-
-variable "enable_key_vault" {
-  description = "Whether to create a Key Vault for this Function App environment."
-  type        = bool
-  default     = true
-}
-
-variable "key_vault_sku_name" {
-  description = "Key Vault SKU."
-  type        = string
-  default     = "standard"
-}
-
-variable "key_vault_soft_delete_retention_days" {
-  description = "Soft delete retention window for Key Vault."
-  type        = number
-  default     = 90
 }
 
 variable "enable_vnet_integration" {
@@ -86,18 +74,6 @@ variable "storage_private_dns_zone_id" {
   default     = null
 }
 
-variable "enable_key_vault_private_endpoint" {
-  description = "Whether to create a private endpoint for Key Vault."
-  type        = bool
-  default     = false
-}
-
-variable "key_vault_private_dns_zone_id" {
-  description = "Private DNS zone ID for Key Vault private endpoint (privatelink.vaultcore.azure.net)."
-  type        = string
-  default     = null
-}
-
 variable "enable_function_app_private_endpoint" {
   description = "Whether to create a private endpoint for the Function App."
   type        = bool
@@ -106,6 +82,29 @@ variable "enable_function_app_private_endpoint" {
 
 variable "function_app_private_dns_zone_id" {
   description = "Private DNS zone ID for Function App private endpoint (privatelink.azurewebsites.net)."
+  type        = string
+  default     = null
+}
+
+variable "enable_key_vault" {
+  description = "Whether to create a Key Vault using the AVM Key Vault module."
+  type        = bool
+  default     = false
+}
+
+variable "enable_key_vault_private_endpoint" {
+  description = "Whether to create a private endpoint for Key Vault when Key Vault is enabled."
+  type        = bool
+  default     = true
+
+  validation {
+    condition     = !(var.enable_key_vault && var.enable_key_vault_private_endpoint) || var.private_endpoint_subnet_id != null
+    error_message = "private_endpoint_subnet_id must be set when enable_key_vault=true and enable_key_vault_private_endpoint=true."
+  }
+}
+
+variable "key_vault_private_dns_zone_id" {
+  description = "Private DNS zone ID for Key Vault private endpoint (privatelink.vaultcore.azure.net)."
   type        = string
   default     = null
 }

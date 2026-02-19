@@ -5,37 +5,22 @@ output "resource_group_name" {
 
 output "function_app_name" {
   description = "Primary Function App name."
-  value       = azurerm_linux_function_app.this.name
+  value       = module.function_app_pattern.name
 }
 
 output "function_app_id" {
   description = "Primary Function App ID."
-  value       = azurerm_linux_function_app.this.id
+  value       = module.function_app_pattern.resource_id
 }
 
 output "function_app_default_hostname" {
   description = "Primary Function App default hostname."
-  value       = azurerm_linux_function_app.this.default_hostname
-}
-
-output "stage_slot_id" {
-  description = "Stage deployment slot ID when stage slot is enabled."
-  value       = try(azurerm_linux_function_app_slot.stage[0].id, null)
+  value       = try(module.function_app_pattern.resource.default_hostname, null)
 }
 
 output "storage_account_name" {
   description = "Storage account backing the Function App."
-  value       = azurerm_storage_account.this.name
-}
-
-output "key_vault_name" {
-  description = "Key Vault name when enabled."
-  value       = try(azurerm_key_vault.this[0].name, null)
-}
-
-output "key_vault_uri" {
-  description = "Key Vault URI when enabled."
-  value       = try(azurerm_key_vault.this[0].vault_uri, null)
+  value       = try(module.function_app_pattern.storage_account_resource.name, null)
 }
 
 output "vnet_integration_enabled" {
@@ -43,17 +28,17 @@ output "vnet_integration_enabled" {
   value       = var.enable_vnet_integration
 }
 
-output "storage_private_endpoint_id" {
-  description = "Storage blob private endpoint ID when enabled."
-  value       = try(azurerm_private_endpoint.storage_blob[0].id, null)
+output "key_vault_name" {
+  description = "Key Vault name when enabled."
+  value       = try(module.key_vault[0].name, null)
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI when enabled."
+  value       = try(module.key_vault[0].uri, null)
 }
 
 output "key_vault_private_endpoint_id" {
   description = "Key Vault private endpoint ID when enabled."
-  value       = try(azurerm_private_endpoint.key_vault[0].id, null)
-}
-
-output "function_app_private_endpoint_id" {
-  description = "Function App private endpoint ID when enabled."
-  value       = try(azurerm_private_endpoint.function_app[0].id, null)
+  value       = try(module.key_vault[0].private_endpoints.primary.id, null)
 }

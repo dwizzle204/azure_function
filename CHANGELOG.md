@@ -1,14 +1,16 @@
-## [0.2.2] - 2026-02-18
+## [0.2.3] - 2026-02-18
 
 ### Added
-- Optional Terraform networking controls for per-environment VNet integration and per-resource private endpoints (storage, key vault, function app).
+- Optional Terraform networking controls for per-environment VNet integration and per-resource private endpoints (storage and function app).
+- Optional Key Vault support via `Azure/avm-res-keyvault-vault/azurerm` with private-access defaults.
 
 ### Changed
 - `app-deploy-stage.yml` is now hard-locked to deploy only to the `stage` slot.
 - README identity section now explicitly includes the dedicated dev deploy identity.
 - Added production slot-swap app setting safeguards for sticky diagnostics/extension behavior.
-- Expanded Terraform hardening for Function App, Storage, and Key Vault resources.
+- Replaced custom Function App/Storage/private endpoint Terraform resources with the AVM module `Azure/avm-ptn-function-app-storage-private-endpoints/azurerm`.
 - Terraform now assumes resource groups are pre-created by subscription bootstrap and references them by `resource_group_name` input.
+- Removed placeholder Terraform outputs that were always `null` to keep module outputs clean.
 
 ## [0.1.0] - 2026-02-18
 
