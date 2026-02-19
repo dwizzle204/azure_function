@@ -96,8 +96,8 @@ Subnet IDs are expected to reference existing bootstrap network resources.
 
 ### Infra workflows
 - `infra-validate.yml` (PR): `terraform fmt` and `terraform validate` only.
-- `infra-plan-dev.yml` (PR): speculative remote plan in dev workspace.
-- `infra-plan-prod.yml` (PR): speculative remote plan in prod workspace.
+- `infra-plan-dev.yml` (PR): Terrascan IaC scan + speculative remote plan in dev workspace.
+- `infra-plan-prod.yml` (PR): Terrascan IaC scan + speculative remote plan in prod workspace.
 - `infra-apply-dev.yml` (push to `main`): remote apply in dev workspace.
 - `infra-apply-prod.yml` (manual): remote apply in prod workspace, gated by `production` environment.
 

@@ -41,6 +41,7 @@
   - Prod plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/prod.tfvars`, workflow file.
   - Dev apply: push to `main` on `infra/*.tf`, `infra/modules/**`, `infra/env/dev.tfvars`, workflow file.
   - Prod apply: `workflow_dispatch` only, must include approved change request number input.
+- Both plan workflows must run Terrascan IaC scanning before creating Terraform Cloud runs.
 - Apply/deploy workflows must define `concurrency` with `cancel-in-progress: false`.
 
 ## Identity and Secrets

@@ -1,8 +1,15 @@
-## [0.2.3] - 2026-02-18
+## [0.2.5] - 2026-02-19
+
+### Changed
+- Final repo polish for release readiness, including cross-file consistency checks across workflows, Terraform layout, and documentation.
+- Version/changelog alignment cleanup to keep release tagging deterministic.
+
+## [0.2.4] - 2026-02-18
 
 ### Added
 - Optional Terraform networking controls for per-environment VNet integration and per-resource private endpoints (storage and function app).
 - Optional Key Vault support via `Azure/avm-res-keyvault-vault/azurerm` with private-access defaults.
+- Terrascan IaC scanning in both Terraform plan workflows prior to Terraform Cloud run creation.
 
 ### Changed
 - `app-deploy-stage.yml` is now hard-locked to deploy only to the `stage` slot.

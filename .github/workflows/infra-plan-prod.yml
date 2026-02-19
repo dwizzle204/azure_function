@@ -20,6 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Terrascan IaC scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "${PWD}:/iac" tenable/terrascan scan -t terraform -i terraform -d /iac/infra
+
       - name: Prepare prod tfvars for remote run
         shell: bash
         run: cp infra/env/prod.tfvars infra/terraform.tfvars

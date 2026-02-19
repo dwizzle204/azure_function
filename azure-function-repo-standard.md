@@ -167,6 +167,7 @@ before upload-configuration is executed.
 Plan runs on:
 
 - all pull requests (required branch protection check)
+- must include IaC security scan (`terrascan`) before remote plan creation
 
 Apply runs automatically on merge to main.
 Apply trigger scope:
@@ -181,6 +182,7 @@ Apply trigger scope:
 Plan runs on:
 
 - all pull requests (required branch protection check)
+- must include IaC security scan (`terrascan`) before remote plan creation
 
 Apply runs only via:
 
