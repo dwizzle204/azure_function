@@ -105,6 +105,9 @@ Slot swap is the production promotion step.
 - Production environment must set:
   - `enable_stage_slot = true`
   - `stage_slot_name = "stage"` (or approved equivalent)
+- Production app configuration must include slot swap hardening settings:
+  - `WEBSITE_OVERRIDE_STICKY_DIAGNOSTICS_SETTINGS=0`
+  - `WEBSITE_OVERRIDE_STICKY_EXTENSION_VERSIONS=0`
 
 ---
 
@@ -144,6 +147,12 @@ infra/env/prod.tfvars -> infra/terraform.tfvars
 ```
 
 before upload-configuration is executed.
+
+## Bootstrap Resource Assumptions
+
+- Resource groups are assumed to be pre-created by subscription/bootstrap provisioning.
+- Terraform must reference pre-created resource groups via variable input (`resource_group_name`) instead of creating them.
+- Optional networking features (VNet integration, private endpoints, private DNS zone bindings) must reference existing network resources via input IDs.
 
 ---
 
@@ -417,3 +426,15 @@ This repository model ensures:
 - production deploys require explicit approval
 - least privilege identities limit blast radius
 - repository structure is predictable across all Azure Functions
+- baseline security hardening is applied to Function App, Storage, and Key Vault resources
+
+## Optional Network Controls
+
+Terraform should support optional, env-specific network controls:
+
+- Function App VNet integration toggled by variable
+- Private endpoints toggled separately for:
+  - Storage Account (blob)
+  - Key Vault
+  - Function App
+- Private endpoint DNS zone IDs provided via variables when DNS integration is required

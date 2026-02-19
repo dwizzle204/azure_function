@@ -11,6 +11,7 @@ Infrastructure changes are executed through Terraform Cloud remote runs. GitHub 
 Identity is separated by environment and privilege.
 
 ### Application identities
+- Dev deploy identity (`AZURE_CLIENT_ID_DEV_DEPLOY`): can deploy non-release packages to the dedicated dev Function App only.
 - Deploy identity (`AZURE_CLIENT_ID_DEPLOY`): can deploy zip artifacts to the `stage` slot only.
 - Promotion identity (`AZURE_CLIENT_ID_PROMOTION`): can perform slot swap/promotion only.
 
@@ -37,6 +38,9 @@ Production traffic is never deployed directly.
 - Dev environment uses a single dedicated Function App without deployment slots (`enable_stage_slot = false`).
 - Production environment uses swap-based promotion with a stage slot (`enable_stage_slot = true`, `stage_slot_name = "stage"`).
 - `app-deploy-stage.yml` and `app-swap-slots.yml` are for production promotion path only.
+- Slot swap hardening settings are applied in app configuration:
+  - `WEBSITE_OVERRIDE_STICKY_DIAGNOSTICS_SETTINGS=0`
+  - `WEBSITE_OVERRIDE_STICKY_EXTENSION_VERSIONS=0`
 
 ## Local Developer Commands
 Use the repository `Makefile` to align local checks with CI:
@@ -56,8 +60,41 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
 - Same Terraform code is used across environments; environment-specific values live in:
   - `infra/env/dev.tfvars`
   - `infra/env/prod.tfvars`
+- Resource groups are expected to be pre-created by subscription bootstrap and referenced by `resource_group_name`.
 - Plan/apply workflows copy the matching env tfvars file into `infra/terraform.tfvars` before uploading configuration to Terraform Cloud.
 - Remote runs upload from `infra` as the Terraform root module.
+
+## Infrastructure Hardening Baseline
+- Function App and stage slot use:
+  - system-assigned managed identity
+  - HTTPS only
+  - minimum TLS 1.2
+  - FTPS disabled
+  - HTTP/2 enabled
+- Storage account uses:
+  - minimum TLS 1.2
+  - public blob access disabled
+  - blob versioning enabled
+  - blob/container soft delete retention
+- Key Vault is provisioned by default (`enable_key_vault = true`) with:
+  - RBAC authorization enabled
+  - purge protection enabled
+  - soft delete retention configured
+
+## Network Isolation Options
+Optional network controls are available per environment via tfvars:
+
+- VNet integration (Function App):
+  - `enable_vnet_integration`
+  - `function_app_integration_subnet_id`
+- Private endpoints:
+  - shared subnet input: `private_endpoint_subnet_id`
+  - storage blob: `enable_storage_private_endpoint`, `storage_private_dns_zone_id`
+  - key vault: `enable_key_vault_private_endpoint`, `key_vault_private_dns_zone_id`
+  - function app: `enable_function_app_private_endpoint`, `function_app_private_dns_zone_id`
+
+All are disabled by default and can be enabled per environment.
+Subnet IDs are expected to reference existing bootstrap network resources.
 
 ### Infra workflows
 - `infra-validate.yml` (PR): `terraform fmt` and `terraform validate` only.
@@ -138,6 +175,8 @@ Reference baseline: `.github/branch-protection.md`
   - `<repo-name>-prod`
 - Configure workspace permissions/tokens to enforce plan/apply separation.
 - Ensure workspace variable sets do not duplicate env-specific tfvars values.
+- Ensure pre-created resource groups exist and are set in `infra/env/*.tfvars`.
+- If enabling network isolation features, ensure required VNet/subnets/private DNS zones already exist and pass their IDs in tfvars.
 
 ### Azure identity setup
 - Configure federated credentials for GitHub OIDC on deploy and promotion app registrations.

@@ -15,11 +15,6 @@ on:
         description: "Azure Function App name"
         required: true
         type: string
-      slot_name:
-        description: "Deployment slot name"
-        required: true
-        default: "stage"
-        type: string
 
 env:
   ARTIFACT_PREFIX: function-app
@@ -30,7 +25,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: app-stage-deploy-${{ inputs.function_app_name }}-${{ inputs.slot_name }}
+  group: app-stage-deploy-${{ inputs.function_app_name }}-stage
   cancel-in-progress: false
 
 jobs:
@@ -69,7 +64,7 @@ jobs:
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ inputs.function_app_name }}
-          slot-name: ${{ inputs.slot_name }}
+          slot-name: stage
           package: ${{ steps.package.outputs.zip_path }}
 
       - name: Logout Azure session

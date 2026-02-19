@@ -8,6 +8,7 @@
 - This is a combined app + infrastructure repository.
 - Application code lives in `src/function_app`.
 - Terraform code lives in `infra` with env values only in `infra/env/*.tfvars`.
+- Resource groups and optional network primitives are assumed to be pre-created by subscription bootstrap and referenced via variables.
 
 ## Delivery and Promotion Rules
 - Do not deploy directly to production.
@@ -27,6 +28,14 @@
   - `infra/env/dev.tfvars` -> `infra/terraform.tfvars` (dev workflows)
   - `infra/env/prod.tfvars` -> `infra/terraform.tfvars` (prod workflows)
 - Upload Terraform Cloud configuration from `infra` as the root module directory.
+- Preserve hardening defaults:
+  - Function App/system slot: managed identity, HTTPS only, TLS 1.2 minimum, FTPS disabled, HTTP/2 enabled
+  - Storage: public blob access disabled, versioning + retention enabled
+  - Key Vault: RBAC auth enabled, purge protection enabled, soft delete retention configured
+- Keep optional network controls variable-driven and environment-specific:
+  - Function App VNet integration toggle + subnet ID
+  - Per-resource private endpoint toggles for storage, key vault, and function app
+  - Optional private DNS zone IDs for each private endpoint type
 - Infra triggers:
   - Dev plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/dev.tfvars`, workflow file.
   - Prod plan: PR on `infra/*.tf`, `infra/modules/**`, `infra/env/prod.tfvars`, workflow file.
