@@ -2,32 +2,19 @@ name: app-swap-slots
 
 on:
   workflow_dispatch:
-    inputs:
-      function_app_name:
-        description: "Azure Function App name"
-        required: true
-        type: string
-      resource_group_name:
-        description: "Azure resource group containing the Function App"
-        required: true
-        type: string
-      source_slot:
-        description: "Source slot to promote"
-        required: true
-        default: "stage"
-        type: string
-      target_slot:
-        description: "Target slot"
-        required: true
-        default: "production"
-        type: string
+
+env:
+  PROD_FUNCTION_APP_NAME: ${{ vars.PROD_FUNCTION_APP_NAME }}
+  PROD_RESOURCE_GROUP_NAME: ${{ vars.PROD_RESOURCE_GROUP_NAME }}
+  SOURCE_SLOT_NAME: ${{ vars.PROD_STAGE_SLOT_NAME }}
+  TARGET_SLOT_NAME: production
 
 permissions:
   id-token: write
   contents: read
 
 concurrency:
-  group: app-slot-swap-${{ inputs.function_app_name }}
+  group: app-slot-swap-${{ vars.PROD_FUNCTION_APP_NAME }}
   cancel-in-progress: false
 
 jobs:
@@ -42,15 +29,32 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Validate production target variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${PROD_FUNCTION_APP_NAME}" ]; then
+            echo "GitHub variable PROD_FUNCTION_APP_NAME must be set." >&2
+            exit 1
+          fi
+          if [ -z "${PROD_RESOURCE_GROUP_NAME}" ]; then
+            echo "GitHub variable PROD_RESOURCE_GROUP_NAME must be set." >&2
+            exit 1
+          fi
+          if [ -z "${SOURCE_SLOT_NAME}" ]; then
+            echo "GitHub variable PROD_STAGE_SLOT_NAME must be set." >&2
+            exit 1
+          fi
+
       - name: Swap slots
         shell: bash
         run: |
           set -euo pipefail
           az functionapp deployment slot swap \
-            --name "${{ inputs.function_app_name }}" \
-            --resource-group "${{ inputs.resource_group_name }}" \
-            --slot "${{ inputs.source_slot }}" \
-            --target-slot "${{ inputs.target_slot }}"
+            --name "${PROD_FUNCTION_APP_NAME}" \
+            --resource-group "${PROD_RESOURCE_GROUP_NAME}" \
+            --slot "${SOURCE_SLOT_NAME}" \
+            --target-slot "${TARGET_SLOT_NAME}"
 
       - name: Logout Azure session
         if: always()

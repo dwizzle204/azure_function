@@ -1,3 +1,29 @@
+## [0.2.7] - 2026-02-21
+
+### Changed
+- Implemented senior cloud-engineering alignment for slot-driven promotion:
+  - `app-deploy-stage.yml` now deploys to `PROD_STAGE_SLOT_NAME` (from GitHub production environment variables).
+  - `app-swap-slots.yml` now swaps `${PROD_STAGE_SLOT_NAME}` to `production`.
+- Corrected Function App public network access logic to use resolved private endpoint state (`local.function_app_private_endpoint_enabled`) rather than raw toggle intent.
+- Added fail-fast Terraform validations for networking toggles to prevent silent no-op configurations:
+  - VNet integration now requires `function_app_integration_subnet_id`.
+  - Storage private endpoint now requires both `private_endpoint_subnet_id` and `storage_private_dns_zone_id`.
+  - Function App private endpoint now requires both `private_endpoint_subnet_id` and `function_app_private_dns_zone_id`.
+- Updated repository documentation and runbook to include `PROD_STAGE_SLOT_NAME` setup and operational behavior.
+
+## [0.2.6] - 2026-02-21
+
+### Changed
+- Hardened production deployment workflows to remove free-form app/slot targeting:
+  - `app-deploy-stage.yml` now deploys only to the fixed production Function App from `PROD_FUNCTION_APP_NAME`.
+  - `app-swap-slots.yml` now performs fixed `stage` -> `production` swap using `PROD_FUNCTION_APP_NAME` and `PROD_RESOURCE_GROUP_NAME`.
+- Added explicit validation checks for required production GitHub environment variables in deployment workflows.
+- Pinned Terraform provider and module versions for deterministic dependency selection:
+  - `hashicorp/azurerm` pinned to `4.61.0`
+  - `Azure/avm-res-keyvault-vault/azurerm` pinned to `0.10.2`
+- Added and committed `infra/.terraform.lock.hcl`.
+- Updated README, standards, Copilot instructions, and promotion runbook to match the hardened workflow model.
+
 ## [0.2.5] - 2026-02-19
 
 ### Changed

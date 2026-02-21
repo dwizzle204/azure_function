@@ -18,11 +18,16 @@
 - `app-deploy-dev.yml`: `workflow_dispatch` only, deploys non-release package directly to dedicated dev Function App (no slot).
 - `app-release.yml`: push to `main` trigger for `src/**`, `VERSION`, and workflow file changes.
 - `app-deploy-stage.yml` and `app-swap-slots.yml`: `workflow_dispatch` only.
+- Production stage deploy and swap targets must be fixed via GitHub `production` environment variables, not manual workflow inputs:
+  - `PROD_FUNCTION_APP_NAME`
+  - `PROD_RESOURCE_GROUP_NAME`
+  - `PROD_STAGE_SLOT_NAME` (must match Terraform `stage_slot_name` in prod)
 - Dev environment must be single-slot (no stage slot); production uses stage slot + swap promotion.
 
 ## Terraform Rules
 - Use Terraform Cloud remote execution through official HashiCorp GitHub Actions.
 - Do not introduce local `terraform plan`/`terraform apply` execution into delivery workflows.
+- Keep provider/module versions explicitly pinned and keep `infra/.terraform.lock.hcl` committed.
 - Preserve workspace split: `<repo>-dev` and `<repo>-prod`.
 - For remote plan/apply workflows, ensure the correct env file is loaded by copying:
   - `infra/env/dev.tfvars` -> `infra/terraform.tfvars` (dev workflows)
@@ -62,6 +67,7 @@
   - `TF_API_TOKEN_PROD_APPLY`
 - `AZURE_CLIENT_ID_PROMOTION` and `TF_API_TOKEN_PROD_APPLY` are production-environment-only.
 - `AZURE_CLIENT_ID_DEV_DEPLOY` should be kept in GitHub `dev` environment.
+- `PROD_FUNCTION_APP_NAME`, `PROD_RESOURCE_GROUP_NAME`, and `PROD_STAGE_SLOT_NAME` should be set only in GitHub `production` environment variables.
 
 ## Workflow Security
 - PR workflows may lint/test/build/plan, but must not deploy, apply, or swap slots.

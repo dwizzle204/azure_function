@@ -9,8 +9,8 @@ locals {
   key_vault_base       = substr(lower(replace(local.name_prefix, "-", "")), 0, 17)
   key_vault_name       = "kv${local.key_vault_base}"
 
-  vnet_integration_enabled           = var.enable_vnet_integration && var.function_app_integration_subnet_id != null
-  storage_private_endpoint_enabled   = var.enable_storage_private_endpoint && var.private_endpoint_subnet_id != null
+  vnet_integration_enabled         = var.enable_vnet_integration && var.function_app_integration_subnet_id != null
+  storage_private_endpoint_enabled = var.enable_storage_private_endpoint && var.private_endpoint_subnet_id != null
   key_vault_private_endpoint_enabled = (
     var.enable_key_vault &&
     var.enable_key_vault_private_endpoint &&
@@ -20,8 +20,8 @@ locals {
 
   function_app_settings = merge(
     {
-      FUNCTIONS_WORKER_RUNTIME                      = "python"
-      WEBSITE_RUN_FROM_PACKAGE                      = "1"
+      FUNCTIONS_WORKER_RUNTIME                     = "python"
+      WEBSITE_RUN_FROM_PACKAGE                     = "1"
       WEBSITE_OVERRIDE_STICKY_DIAGNOSTICS_SETTINGS = "0"
       WEBSITE_OVERRIDE_STICKY_EXTENSION_VERSIONS   = "0"
     },
@@ -69,7 +69,7 @@ module "key_vault" {
   count = var.enable_key_vault ? 1 : 0
 
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = ">= 0.9.0"
+  version = "0.10.2"
 
   name                = local.key_vault_name
   location            = data.azurerm_resource_group.this.location
@@ -108,13 +108,13 @@ module "function_app_pattern" {
     endpoints                = local.storage_endpoints
   }
 
-  app_settings                 = local.function_app_settings
-  functions_extension_version  = var.functions_extension_version
-  https_only                   = true
-  public_network_access_enabled = !var.enable_function_app_private_endpoint
-  virtual_network_subnet_id    = local.vnet_integration_enabled ? var.function_app_integration_subnet_id : null
+  app_settings                        = local.function_app_settings
+  functions_extension_version         = var.functions_extension_version
+  https_only                          = true
+  public_network_access_enabled       = !local.function_app_private_endpoint_enabled
+  virtual_network_subnet_id           = local.vnet_integration_enabled ? var.function_app_integration_subnet_id : null
   private_endpoint_subnet_resource_id = var.private_endpoint_subnet_id
-  private_endpoints            = local.function_private_endpoints
+  private_endpoints                   = local.function_private_endpoints
 
   site_config = {
     ftps_state          = "Disabled"
