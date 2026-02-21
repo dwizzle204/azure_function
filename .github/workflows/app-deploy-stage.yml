@@ -11,13 +11,11 @@ on:
         description: "GitHub Actions run_id that produced the artifact"
         required: true
         type: string
-      function_app_name:
-        description: "Azure Function App name"
-        required: true
-        type: string
 
 env:
   ARTIFACT_PREFIX: function-app
+  PROD_FUNCTION_APP_NAME: ${{ vars.PROD_FUNCTION_APP_NAME }}
+  PROD_STAGE_SLOT_NAME: ${{ vars.PROD_STAGE_SLOT_NAME }}
 
 permissions:
   id-token: write
@@ -25,7 +23,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: app-stage-deploy-${{ inputs.function_app_name }}-stage
+  group: app-stage-deploy-${{ vars.PROD_FUNCTION_APP_NAME }}-${{ vars.PROD_STAGE_SLOT_NAME }}
   cancel-in-progress: false
 
 jobs:
@@ -53,6 +51,19 @@ jobs:
           fi
           echo "zip_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
 
+      - name: Validate production app target variable
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${PROD_FUNCTION_APP_NAME}" ]; then
+            echo "GitHub variable PROD_FUNCTION_APP_NAME must be set." >&2
+            exit 1
+          fi
+          if [ -z "${PROD_STAGE_SLOT_NAME}" ]; then
+            echo "GitHub variable PROD_STAGE_SLOT_NAME must be set." >&2
+            exit 1
+          fi
+
       - name: Azure login (limited deploy identity)
         uses: azure/login@v2
         with:
@@ -60,11 +71,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy artifact to stage slot
+      - name: Deploy artifact to pre-production slot
         uses: Azure/functions-action@v1
         with:
-          app-name: ${{ inputs.function_app_name }}
-          slot-name: stage
+          app-name: ${{ env.PROD_FUNCTION_APP_NAME }}
+          slot-name: ${{ env.PROD_STAGE_SLOT_NAME }}
           package: ${{ steps.package.outputs.zip_path }}
 
       - name: Logout Azure session

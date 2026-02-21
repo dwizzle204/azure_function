@@ -118,6 +118,8 @@ Terraform:
 - must use Terraform Cloud remote execution
 - must not run CLI plan/apply locally
 - must use official HashiCorp GitHub Actions calling Terraform Cloud API
+- must pin provider and module versions to explicit versions (no open-ended minimum constraints)
+- must commit `infra/.terraform.lock.hcl` for deterministic provider selection
 - should standardize Function App infrastructure on:
   - `Azure/terraform-azurerm-avm-ptn-function-app-storage-private-endpoints`
 - should use AVM Key Vault module when Key Vault is required:
@@ -209,6 +211,11 @@ Production apply dispatch input must require an approved change request number.
 `app-deploy-dev.yml` runs only via `workflow_dispatch` and deploys to dedicated dev Function App.
 
 `app-deploy-stage.yml` and `app-swap-slots.yml` run only via `workflow_dispatch`.
+Production deployment targets for these workflows must come from GitHub environment variables, not free-form workflow inputs.
+Required `production` environment variables:
+- `PROD_FUNCTION_APP_NAME`
+- `PROD_RESOURCE_GROUP_NAME`
+- `PROD_STAGE_SLOT_NAME` (must match Terraform `stage_slot_name` in prod)
 
 ---
 
@@ -280,6 +287,13 @@ Required placement:
 - `AZURE_CLIENT_ID_PROMOTION` and `TF_API_TOKEN_PROD_APPLY` must exist only in GitHub `production` environment.
 - `AZURE_CLIENT_ID_DEV_DEPLOY` should be stored in GitHub `dev` environment.
 - `AZURE_CLIENT_ID_DEPLOY` must be scoped to stage deployment permissions only.
+
+## Required GitHub Variable Names
+
+Production environment:
+- `PROD_FUNCTION_APP_NAME`
+- `PROD_RESOURCE_GROUP_NAME`
+- `PROD_STAGE_SLOT_NAME`
 
 ---
 

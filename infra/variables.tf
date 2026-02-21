@@ -48,6 +48,11 @@ variable "enable_vnet_integration" {
   description = "Whether to enable regional VNet integration for the Function App."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_vnet_integration || var.function_app_integration_subnet_id != null
+    error_message = "function_app_integration_subnet_id must be set when enable_vnet_integration=true."
+  }
 }
 
 variable "function_app_integration_subnet_id" {
@@ -66,6 +71,11 @@ variable "enable_storage_private_endpoint" {
   description = "Whether to create a private endpoint for the Storage Account (blob)."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_storage_private_endpoint || (var.private_endpoint_subnet_id != null && var.storage_private_dns_zone_id != null)
+    error_message = "private_endpoint_subnet_id and storage_private_dns_zone_id must be set when enable_storage_private_endpoint=true."
+  }
 }
 
 variable "storage_private_dns_zone_id" {
@@ -78,6 +88,11 @@ variable "enable_function_app_private_endpoint" {
   description = "Whether to create a private endpoint for the Function App."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.enable_function_app_private_endpoint || (var.private_endpoint_subnet_id != null && var.function_app_private_dns_zone_id != null)
+    error_message = "private_endpoint_subnet_id and function_app_private_dns_zone_id must be set when enable_function_app_private_endpoint=true."
+  }
 }
 
 variable "function_app_private_dns_zone_id" {

@@ -29,8 +29,8 @@ Application delivery uses two paths: non-release dev deployment and release prom
 1. `app-ci.yml` (PR): lint, dependency install, local runtime smoke test using Azure Functions Core Tools, and packaging validation.
 2. `app-deploy-dev.yml` (manual): build temporary package from selected git ref and deploy directly to dedicated dev Function App (no stage slot).
 3. `app-release.yml` (push to `main`): build zip from `src/function_app` and publish versioned artifact.
-4. `app-deploy-stage.yml` (manual): deploy selected release artifact version to `stage` slot using stage deploy identity.
-5. `app-swap-slots.yml` (manual): swap `stage` into `production` using promotion identity.
+4. `app-deploy-stage.yml` (manual): deploy selected release artifact version to the production pre-production slot (`PROD_STAGE_SLOT_NAME`) using stage deploy identity.
+5. `app-swap-slots.yml` (manual): swap `PROD_STAGE_SLOT_NAME` into `production` using promotion identity.
 
 Production traffic is never deployed directly.
 
@@ -63,6 +63,7 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
 - Resource groups are expected to be pre-created by subscription bootstrap and referenced by `resource_group_name`.
 - Plan/apply workflows copy the matching env tfvars file into `infra/terraform.tfvars` before uploading configuration to Terraform Cloud.
 - Remote runs upload from `infra` as the Terraform root module.
+- Provider/module versions are pinned in code and `infra/.terraform.lock.hcl` is committed for deterministic provider selection.
 
 ## Infrastructure Hardening Baseline
 Infrastructure is provisioned via `Azure/avm-ptn-function-app-storage-private-endpoints/azurerm`.
@@ -106,8 +107,8 @@ Application workflows:
 - `app-ci.yml`: pull request quality gate for app code only (no deploy).
 - `app-deploy-dev.yml`: manual direct deploy to dedicated dev Function App using non-release package.
 - `app-release.yml`: builds and publishes versioned app artifact on `main`.
-- `app-deploy-stage.yml`: manual deploy of selected artifact version to stage slot.
-- `app-swap-slots.yml`: manual stage-to-production slot swap.
+- `app-deploy-stage.yml`: manual deploy of selected artifact version to the fixed production pre-production slot target.
+- `app-swap-slots.yml`: manual fixed pre-production slot to `production` swap.
 
 Infrastructure workflows:
 - `infra-validate.yml`: PR formatting and validation checks only.
@@ -120,9 +121,9 @@ Infrastructure workflows:
 Promotion to production is a controlled, manual step.
 
 1. Build and publish a versioned artifact from `main`.
-2. Manually deploy that artifact to the `stage` slot.
-3. Validate behavior in stage.
-4. Manually run slot swap to promote stage to production.
+2. Manually deploy that artifact to the pre-production slot (`PROD_STAGE_SLOT_NAME`).
+3. Validate behavior in the pre-production slot.
+4. Manually run slot swap to promote that slot to production.
 
 This process provides deterministic promotion and a clear audit trail.
 
@@ -155,6 +156,12 @@ Repository-level (or `dev` environment where preferred):
 - `AZURE_CLIENT_ID_PROMOTION`
 - `TF_API_TOKEN_PROD_APPLY`
 - Any additional prod-only credentials
+
+### Required GitHub Variables
+Set these in the `production` environment to hard-lock deployment targets:
+- `PROD_FUNCTION_APP_NAME`
+- `PROD_RESOURCE_GROUP_NAME`
+- `PROD_STAGE_SLOT_NAME` (must match Terraform `stage_slot_name` for production)
 
 ### Branch protection
 Configure branch protection on `main` to require:
