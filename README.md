@@ -181,6 +181,9 @@ Reference baseline: `.github/branch-protection.md`
 - Configure workspace permissions/tokens to enforce plan/apply separation.
 - Ensure workspace variable sets do not duplicate env-specific tfvars values.
 - Ensure pre-created resource groups exist and are set in `infra/env/*.tfvars`.
+- Storage account naming is deterministic and globally unique per environment/subscription:
+  - prefix derives from `project_name` + workspace
+  - suffix derives from hash(workspace + subscription ID)
 - If enabling network isolation features, ensure required VNet/subnets/private DNS zones already exist and pass their IDs in tfvars.
 
 ### Azure identity setup

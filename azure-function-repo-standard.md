@@ -382,6 +382,11 @@ This ensures full traceability:
 
 repo -> workspace -> infrastructure -> cloud resource
 
+For globally unique Azure resource names (for example Storage Account names), the name must be deterministic and collision-resistant across environments and subscriptions:
+- include environment/workspace-derived prefix context
+- include a deterministic hash suffix derived from stable inputs (for example workspace + subscription ID)
+- remain compliant with Azure naming constraints for the target resource
+
 ---
 
 # README Required Sections

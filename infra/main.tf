@@ -4,8 +4,9 @@ data "azurerm_resource_group" "this" {
 }
 
 locals {
-  storage_account_base = substr(lower(replace(var.project_name, "-", "")), 0, 21)
-  storage_account_name = "st${local.storage_account_base}"
+  storage_account_prefix = substr(lower(replace(local.name_prefix, "-", "")), 0, 16)
+  storage_account_hash   = substr(sha1("${local.name_prefix}-${data.azurerm_client_config.current.subscription_id}"), 0, 6)
+  storage_account_name   = "st${local.storage_account_prefix}${local.storage_account_hash}"
   key_vault_base       = substr(lower(replace(local.name_prefix, "-", "")), 0, 17)
   key_vault_name       = "kv${local.key_vault_base}"
 
