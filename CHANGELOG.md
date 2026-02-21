@@ -1,3 +1,12 @@
+## [0.2.8] - 2026-02-21
+
+### Changed
+- Fixed deterministic Storage Account naming for Terraform template safety across environments/subscriptions:
+  - Storage name now uses workspace-aware prefix plus deterministic hash suffix derived from workspace + subscription context.
+- Updated repository documentation to codify globally unique Azure naming requirements for template consumers:
+  - Added naming guidance in `README.md` Terraform Cloud setup section.
+  - Added naming traceability hardening rule in `azure-function-repo-standard.md`.
+
 ## [0.2.7] - 2026-02-21
 
 ### Changed
