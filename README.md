@@ -5,6 +5,8 @@ This repository is a learning template, not a production-ready baseline.
 It demonstrates patterns for Azure Functions, Terraform, and GitHub Actions governance.
 Validate security, compliance, reliability, and operational controls before using any part of this in production.
 
+Template version: `0.2.10` (see `VERSION` and `CHANGELOG.md`).
+
 ## Purpose
 This repository contains both:
 - Azure Function application code (`src/function_app`)
@@ -122,6 +124,12 @@ Infrastructure workflows:
 - `infra-plan-prod.yml`: PR wrapper for centralized prod speculative plan.
 - `infra-apply-dev.yml`: push wrapper for centralized dev apply.
 - `infra-apply-prod.yml`: manual wrapper for centralized prod apply.
+
+### Auto vs Manual Apply Pattern
+- Auto apply wrappers are used for lower-risk environments (for example `dev`) and trigger on `push` to `main`.
+- Manual apply wrappers are used for higher-risk environments (for example `prod`) and trigger on `workflow_dispatch`.
+- Wrapper workflows provide environment targeting by passing `environment_name`, workspace, and tfvars inputs to centralized reusable workflows.
+- To add new environments such as `qa`, `stage`, or `preprod`, follow the blueprint in `docs/infra-environment-expansion.md`.
 
 ## Promotion Process
 Promotion to production is a controlled, manual step.

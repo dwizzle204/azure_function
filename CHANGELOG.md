@@ -1,3 +1,11 @@
+## [0.2.10] - 2026-02-26
+
+### Changed
+- Added infrastructure environment expansion guidance for future environments such as `qa`, `stage`, and `preprod`:
+  - Added `docs/infra-environment-expansion.md` with wrapper blueprints for plan/apply patterns.
+  - Updated README with explicit auto-apply vs manual-apply strategy and environment scaling guidance.
+- Reinforced educational-template positioning in repository documentation.
+
 ## [0.2.9] - 2026-02-26
 
 ### Changed
