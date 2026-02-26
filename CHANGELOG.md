@@ -1,3 +1,18 @@
+## [0.2.9] - 2026-02-26
+
+### Changed
+- Migrated repository workflows to wrapper-based governance model:
+  - Local workflows in `.github/workflows` now delegate to centralized reusable workflows in `github_pipeline_governance`.
+  - Wrapper workflows are pinned to version tags for controlled upgrades.
+- Updated deployment/apply wrappers to align with reusable-workflow calling rules:
+  - Environment targeting is now passed via workflow inputs rather than caller-job `environment` keys.
+- Added release artifact provenance enforcement in stage deployment path:
+  - Stage deployment validates source workflow name, source branch, event type, and successful run conclusion before deployment.
+- Updated repository documentation for governance model clarity:
+  - Added migration guide at `docs/pipeline-governance-migration.md`.
+  - Updated README workflow sections to identify wrapper-vs-source-of-truth behavior.
+  - Added explicit educational-use-only guidance.
+
 ## [0.2.8] - 2026-02-21
 
 ### Changed

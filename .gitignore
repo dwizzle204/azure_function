@@ -11,6 +11,12 @@ venv/
 dist/
 func.log
 
+# Terraform local working state
+.terraform/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+
 # Azure Functions local settings
 local.settings.json
 src/function_app/local.settings.json

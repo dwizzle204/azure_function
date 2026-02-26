@@ -1,5 +1,10 @@
 # Azure Function Service Repository
 
+## Educational Use Only
+This repository is a learning template, not a production-ready baseline.
+It demonstrates patterns for Azure Functions, Terraform, and GitHub Actions governance.
+Validate security, compliance, reliability, and operational controls before using any part of this in production.
+
 ## Purpose
 This repository contains both:
 - Azure Function application code (`src/function_app`)
@@ -25,6 +30,7 @@ Production credentials/tokens must be stored only in the GitHub `production` env
 
 ## Deployment Workflow
 Application delivery uses two paths: non-release dev deployment and release promotion.
+Local workflow files in this repo are wrappers; executable workflow logic is centralized in `github_pipeline_governance`.
 
 1. `app-ci.yml` (PR): lint, dependency install, local runtime smoke test using Azure Functions Core Tools, and packaging validation.
 2. `app-deploy-dev.yml` (manual): build temporary package from selected git ref and deploy directly to dedicated dev Function App (no stage slot).
@@ -61,7 +67,7 @@ Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHu
   - `infra/env/dev.tfvars`
   - `infra/env/prod.tfvars`
 - Resource groups are expected to be pre-created by subscription bootstrap and referenced by `resource_group_name`.
-- Plan/apply workflows copy the matching env tfvars file into `infra/terraform.tfvars` before uploading configuration to Terraform Cloud.
+- Plan/apply wrappers pass env-specific tfvars and Terraform root inputs to centralized reusable workflows.
 - Remote runs upload from `infra` as the Terraform root module.
 - Provider/module versions are pinned in code and `infra/.terraform.lock.hcl` is committed for deterministic provider selection.
 
@@ -96,26 +102,26 @@ All are disabled by default and can be enabled per environment.
 Subnet IDs are expected to reference existing bootstrap network resources.
 
 ### Infra workflows
-- `infra-validate.yml` (PR): `terraform fmt` and `terraform validate` only.
-- `infra-plan-dev.yml` (PR): Terrascan IaC scan + speculative remote plan in dev workspace.
-- `infra-plan-prod.yml` (PR): Terrascan IaC scan + speculative remote plan in prod workspace.
-- `infra-apply-dev.yml` (push to `main`): remote apply in dev workspace.
-- `infra-apply-prod.yml` (manual): remote apply in prod workspace, gated by `production` environment.
+- `infra-validate.yml` (PR wrapper): invokes centralized Terraform validate reusable workflow.
+- `infra-plan-dev.yml` (PR wrapper): invokes centralized dev speculative plan reusable workflow.
+- `infra-plan-prod.yml` (PR wrapper): invokes centralized prod speculative plan reusable workflow.
+- `infra-apply-dev.yml` (push wrapper): invokes centralized dev apply reusable workflow.
+- `infra-apply-prod.yml` (manual wrapper): invokes centralized prod apply reusable workflow, gated by `production` environment.
 
 ## Workflow Reference
 Application workflows:
-- `app-ci.yml`: pull request quality gate for app code only (no deploy).
-- `app-deploy-dev.yml`: manual direct deploy to dedicated dev Function App using non-release package.
-- `app-release.yml`: builds and publishes versioned app artifact on `main`.
-- `app-deploy-stage.yml`: manual deploy of selected artifact version to the fixed production pre-production slot target.
-- `app-swap-slots.yml`: manual fixed pre-production slot to `production` swap.
+- `app-ci.yml`: PR wrapper for centralized CI checks.
+- `app-deploy-dev.yml`: manual wrapper for centralized dev deploy workflow.
+- `app-release.yml`: push-to-main wrapper for centralized artifact build/publish workflow.
+- `app-deploy-stage.yml`: manual wrapper for centralized stage deploy workflow, including release provenance checks.
+- `app-swap-slots.yml`: manual wrapper for centralized slot swap workflow.
 
 Infrastructure workflows:
-- `infra-validate.yml`: PR formatting and validation checks only.
-- `infra-plan-dev.yml`: PR speculative remote plan for dev workspace.
-- `infra-plan-prod.yml`: PR speculative remote plan for prod workspace.
-- `infra-apply-dev.yml`: automatic remote apply on merge to `main` for dev.
-- `infra-apply-prod.yml`: manual remote apply for prod, gated by `production`.
+- `infra-validate.yml`: PR wrapper for centralized formatting and validation checks.
+- `infra-plan-dev.yml`: PR wrapper for centralized dev speculative plan.
+- `infra-plan-prod.yml`: PR wrapper for centralized prod speculative plan.
+- `infra-apply-dev.yml`: push wrapper for centralized dev apply.
+- `infra-apply-prod.yml`: manual wrapper for centralized prod apply.
 
 ## Promotion Process
 Promotion to production is a controlled, manual step.
@@ -197,3 +203,9 @@ Reference baseline: `.github/branch-protection.md`
 - `infra/**` owned by cloud engineering
 - `src/**` and `tests/**` owned by application engineering
 - `.github/workflows/**` and `CODEOWNERS` protected by shared ownership
+
+## Pipeline Governance Model
+Workflows under `.github/workflows` are wrapper workflows that call reusable workflows from a centralized governance repository pinned by version tag.
+Behavior changes should be made in the governance repository and consumed here by tag upgrade.
+
+Migration details: `docs/pipeline-governance-migration.md`

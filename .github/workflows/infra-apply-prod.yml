@@ -8,12 +8,6 @@ on:
         required: true
         type: string
 
-env:
-  TF_CLOUD_ORGANIZATION: replace-with-tfc-organization
-  TF_API_TOKEN: ${{ secrets.TF_API_TOKEN_PROD_APPLY }}
-  TF_WORKSPACE: ${{ github.event.repository.name }}-prod
-  CONFIG_DIRECTORY: ./infra
-
 permissions:
   contents: read
 
@@ -23,47 +17,13 @@ concurrency:
 
 jobs:
   terraform-apply-prod:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Prepare prod tfvars for remote run
-        shell: bash
-        run: cp infra/env/prod.tfvars infra/terraform.tfvars
-
-      - name: Upload Terraform configuration
-        id: apply-upload
-        uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.3.2
-        with:
-          workspace: ${{ env.TF_WORKSPACE }}
-          directory: ${{ env.CONFIG_DIRECTORY }}
-          speculative: false
-
-      - name: Create Terraform Cloud run
-        id: apply-create-run
-        uses: hashicorp/tfc-workflows-github/actions/create-run@v1.3.2
-        with:
-          workspace: ${{ env.TF_WORKSPACE }}
-          configuration_version: ${{ steps.apply-upload.outputs.configuration_version_id }}
-          plan_only: false
-
-      - name: Apply Terraform Cloud run
-        id: apply-run
-        uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.3.2
-        with:
-          run: ${{ fromJSON(steps.apply-create-run.outputs.payload).data.id }}
-          comment: ${{ format('Manual prod apply (change request): {0}', inputs.change_request_number) }}
-
-      - name: Add apply summary to workflow
-        shell: bash
-        run: |
-          {
-            echo "## Terraform Cloud Prod Apply"
-            echo ""
-            echo "Workspace: \\`${{ env.TF_WORKSPACE }}\\`"
-            echo "Run URL: ${{ steps.apply-create-run.outputs.run_link }}"
-            echo ""
-            echo "Change Request: ${{ inputs.change_request_number }}"
-          } >> "$GITHUB_STEP_SUMMARY"
+    uses: your-org/github_pipeline_governance/.github/workflows/infra-apply.yml@v1.0.0
+    with:
+      tf_cloud_organization: replace-with-tfc-organization
+      tf_workspace: ${{ github.event.repository.name }}-prod
+      config_directory: ./infra
+      tfvars_file: infra/env/prod.tfvars
+      apply_comment: "${{ format('Manual prod apply (change request): {0}', inputs.change_request_number) }}"
+      environment_name: production
+    secrets:
+      tf_api_token: ${{ secrets.TF_API_TOKEN_PROD_APPLY }}

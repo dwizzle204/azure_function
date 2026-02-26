@@ -8,22 +8,6 @@ permissions:
 
 jobs:
   terraform-validate:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infra
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init (no backend)
-        run: terraform init -backend=false
-
-      - name: Terraform Fmt
-        run: terraform fmt -check -recursive
-
-      - name: Terraform Validate
-        run: terraform validate
+    uses: your-org/github_pipeline_governance/.github/workflows/infra-validate.yml@v1.0.0
+    with:
+      config_directory: ./infra
