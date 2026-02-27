@@ -1,3 +1,15 @@
+## [0.2.11] - 2026-02-27
+
+### Added
+- Added Terraform-focused Terratest suite under `tests/terraform` with Go-based checks for:
+  - local backend-free `terraform init` + `terraform validate` on a sanitized `infra/` copy
+  - infrastructure contract assertions for key Terraform outputs and variable validation rules
+- Added `infra-terratest.yml` wrapper workflow for Terraform Terratest execution on PR/workflow_dispatch.
+
+### Changed
+- Updated `infra-terratest.yml` to delegate execution to centralized governance workflow (`github_pipeline_governance/.github/workflows/infra-terratest.yml@v1.0.1`) to align with wrapper-only workflow architecture.
+- Updated documentation (`README.md`, `docs/pipeline-governance-migration.md`, `azure-function-repo-standard.md`) to include Terraform Terratest workflow behavior and governance pointer details.
+
 ## [0.2.10] - 2026-02-26
 
 ### Changed

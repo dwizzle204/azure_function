@@ -5,7 +5,7 @@ This repository is a learning template, not a production-ready baseline.
 It demonstrates patterns for Azure Functions, Terraform, and GitHub Actions governance.
 Validate security, compliance, reliability, and operational controls before using any part of this in production.
 
-Template version: `0.2.10` (see `VERSION` and `CHANGELOG.md`).
+Template version: `0.2.11` (see `VERSION` and `CHANGELOG.md`).
 
 ## Purpose
 This repository contains both:
@@ -57,6 +57,7 @@ Use the repository `Makefile` to align local checks with CI:
 - `make lint` runs Python lint checks used by CI.
 - `make test` runs sample unit tests.
 - `make package` builds the app zip artifact.
+- `cd tests/terraform && go test -v ./... -timeout 30m` runs Terraform Terratest checks used by `infra-terratest.yml`.
 
 ## Terraform Cloud Execution Model
 Terraform is executed remotely in Terraform Cloud using official HashiCorp GitHub actions.
@@ -105,6 +106,7 @@ Subnet IDs are expected to reference existing bootstrap network resources.
 
 ### Infra workflows
 - `infra-validate.yml` (PR wrapper): invokes centralized Terraform validate reusable workflow.
+- `infra-terratest.yml` (PR/workflow_dispatch wrapper): invokes centralized Terraform Terratest reusable workflow (`github_pipeline_governance/.github/workflows/infra-terratest.yml@v1.0.1`) for repository-local tests under `tests/terraform`.
 - `infra-plan-dev.yml` (PR wrapper): invokes centralized dev speculative plan reusable workflow.
 - `infra-plan-prod.yml` (PR wrapper): invokes centralized prod speculative plan reusable workflow.
 - `infra-apply-dev.yml` (push wrapper): invokes centralized dev apply reusable workflow.
@@ -120,6 +122,7 @@ Application workflows:
 
 Infrastructure workflows:
 - `infra-validate.yml`: PR wrapper for centralized formatting and validation checks.
+- `infra-terratest.yml`: PR/workflow_dispatch wrapper for centralized Terraform Terratest checks.
 - `infra-plan-dev.yml`: PR wrapper for centralized dev speculative plan.
 - `infra-plan-prod.yml`: PR wrapper for centralized prod speculative plan.
 - `infra-apply-dev.yml`: push wrapper for centralized dev apply.

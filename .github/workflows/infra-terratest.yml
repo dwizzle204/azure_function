@@ -1,0 +1,21 @@
+name: infra-terratest
+
+on:
+  pull_request:
+    paths:
+      - "infra/**/*.tf"
+      - "infra/**/*.tfvars"
+      - "infra/.terraform.lock.hcl"
+      - "tests/terraform/**"
+      - ".github/workflows/infra-terratest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-terratest:
+    uses: your-org/github_pipeline_governance/.github/workflows/infra-terratest.yml@v1.0.1
+    with:
+      config_directory: ./infra
+      terratest_directory: ./tests/terraform
