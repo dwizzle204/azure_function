@@ -3,9 +3,10 @@
 This repository now uses wrapper workflows that delegate implementation to a centralized governance repository.
 
 ## Current Pointer
-All wrappers point to:
+Wrappers point to:
 - `your-org/github_pipeline_governance`
-- tag: `v1.0.0`
+- baseline tag: `v1.0.0`
+- `infra-terratest.yml` is pinned to: `v1.0.1`
 
 ## Required Follow-up
 Before enabling in GitHub, replace:
@@ -13,6 +14,8 @@ Before enabling in GitHub, replace:
 - `replace-with-tfc-organization` with your Terraform Cloud organization
 
 ## Why wrappers remain
+- Includes Terraform Terratest wrapper support via `infra-terratest.yml`.
+
 Wrappers keep repository-specific trigger behavior and environment wiring while centralizing pipeline logic.
 
 ## Source of Truth

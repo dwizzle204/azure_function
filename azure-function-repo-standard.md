@@ -38,6 +38,7 @@ CODEOWNERS
     app-deploy-stage.yml
     app-swap-slots.yml
     infra-validate.yml
+    infra-terratest.yml
     infra-plan-dev.yml
     infra-plan-prod.yml
     infra-apply-dev.yml
@@ -178,6 +179,11 @@ Apply trigger scope:
 - module changes
 - dev tfvars change
 - workflow file changes for the dev apply workflow
+
+## Terraform Terratest workflow
+
+`infra-terratest.yml` runs on pull request changes to Terraform and `tests/terraform/**` and on `workflow_dispatch`.
+It must remain a wrapper pointing to the centralized governance workflow.
 
 ## Production infrastructure
 
@@ -423,6 +429,7 @@ Document required branch protection status checks for `main`:
 
 - `app-ci / validate`
 - `infra-validate / terraform-validate`
+- `infra-terratest / terraform-terratest`
 - `infra-plan-dev / terraform-plan-dev`
 - `infra-plan-prod / terraform-plan-prod`
 
